@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Online Quiz</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #eeeeee;
+    margin: 0;
+    padding: 40px 16px;
+  }
+
+  /* ---------- Login Card ---------- */
+  .login-card {
+    background: #ffffff;
+    max-width: 340px;
+    margin: 0 auto 40px;
+    padding: 24px 28px 30px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    text-align: center;
+  }
+  .login-card h2 {
+    font-size: 18px;
+    margin: 0 0 20px;
+    letter-spacing: 0.5px;
+  }
+  .login-card input[type="text"],
+  .login-card input[type="password"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 14px;
+    border: 1px solid #bbb;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  .login-card button {
+    background-color: #2e8b3d;
+    color: #fff;
+    border: none;
+    padding: 10px 30px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .login-card button:hover { background-color: #256b30; }
+  .login-error {
+    color: #c0392b;
+    font-size: 12px;
+    min-height: 16px;
+    margin: -6px 0 10px;
+  }
+
+  /* ---------- Quiz Card ---------- */
+  .quiz-card {
+    background: #ffffff;
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 28px 34px 34px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .quiz-card h1 {
+    text-align: center;
+    color: #1a1aff;
+    font-size: 24px;
+    margin: 0 0 24px;
+  }
+  .quiz-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 13px;
+    color: #555;
+    margin-bottom: 18px;
+  }
+  .question-block { margin-bottom: 26px; }
+  .question-block p.qtext {
+    font-weight: bold;
+    font-size: 15px;
+    margin: 0 0 12px;
+  }
+  .option-row {
+    display: block;
+    font-size: 14px;
+    margin-bottom: 8px;
+    cursor: pointer;
+  }
+  .option-row input[type="radio"] {
+    margin-right: 8px;
+  }
+  .quiz-nav {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .quiz-nav button {
+    background-color: #2e8b3d;
+    color: #fff;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  .quiz-nav button:disabled {
+    background-color: #a5c9ab;
+    cursor: not-allowed;
+  }
+  .quiz-nav button:hover:not(:disabled) { background-color: #256b30; }
+
+  /* ---------- Result ---------- */
+  .result-card {
+    background: #ffffff;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 30px 34px;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    text-align: center;
+  }
+  .result-card h2 { color: #1a1aff; margin-top: 0; }
+  .result-score { font-size: 32px; font-weight: bold; margin: 10px 0 4px; }
+  .result-status { font-size: 14px; margin-bottom: 20px; }
+  .result-status.pass { color: #2e8b3d; font-weight: bold; }
+  .result-status.fail { color: #c0392b; font-weight: bold; }
+  .review-list { text-align: left; list-style: none; padding: 0; margin: 0 0 22px; font-size: 13px; }
+  .review-list li { padding: 6px 0; border-bottom: 1px solid #eee; }
+  .review-list .ok { color: #2e8b3d; font-weight: bold; }
+  .review-list .no { color: #c0392b; font-weight: bold; }
+
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- ===================== LOGIN ===================== -->
+<div class="login-card" id="screen-login">
+  <h2>ONLINE QUIZ LOGIN</h2>
+  <form id="login-form" novalidate>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <p class="login-error" id="login-error"></p>
+    <button type="submit">Login</button>
+  </form>
+</div>
+
+<!-- ===================== QUIZ ===================== -->
+<div class="quiz-card hidden" id="screen-quiz">
+  <h1>ONLINE QUIZ</h1>
+  <div class="quiz-meta">
+    <span id="q-index">Question 1 / 10</span>
+    <span id="q-score">Score: 0</span>
+  </div>
+
+  <div class="question-block">
+    <p class="qtext" id="q-text">Question text</p>
+    <div id="options"></div>
+  </div>
+
+  <div class="quiz-nav">
+    <button id="btn-next" disabled>Next</button>
+  </div>
+</div>
+
+<!-- ===================== RESULT ===================== -->
+<div class="result-card hidden" id="screen-result">
+  <h2>Quiz Completed</h2>
+  <p class="result-score" id="final-score">0/10</p>
+  <p class="result-status" id="final-status">Result</p>
+  <ul class="review-list" id="review-list"></ul>
+  <button id="btn-restart" style="background-color:#2e8b3d;color:#fff;border:none;padding:10px 26px;border-radius:4px;font-size:14px;cursor:pointer;">Try Again</button>
+</div>
+
+<script>
+(function(){
+
+  // ---------- Question bank (10 questions) ----------
+  const QUESTIONS = [
+    { q: "Java is a ?", options: ["Programming Language", "Browser", "Operating System", "Database"], answer: 0 },
+    { q: "HTML stands for ?", options: ["Hyper Text Markup Language", "High Text Machine Language", "Hyperlink Text Method Language", "Home Tool Markup Language"], answer: 0 },
+    { q: "Which symbol is used for single line comments in JavaScript ?", options: ["//", "<!-- -->", "**", "##"], answer: 0 },
+    { q: "Which of these is a JavaScript data type ?", options: ["Boolean", "Table", "Column", "Sheet"], answer: 0 },
+    { q: "CSS is mainly used for ?", options: ["Styling web pages", "Server-side logic", "Database queries", "Network security"], answer: 0 },
+    { q: "Which tag is used to insert an image in HTML ?", options: ["<img>", "<pic>", "<image>", "<src>"], answer: 0 },
+    { q: "Which company developed Java ?", options: ["Sun Microsystems", "Microsoft", "Google", "Apple"], answer: 0 },
+    { q: "Which keyword is used to declare a constant in JavaScript ?", options: ["const", "var", "let", "static"], answer: 0 },
+    { q: "What does CPU stand for ?", options: ["Central Processing Unit", "Computer Personal Unit", "Central Program Utility", "Control Processing Unit"], answer: 0 },
+    { q: "Which of the following is a JavaScript pop-up box ?", options: ["alert()", "popup()", "message()", "display()"], answer: 0 }
+  ];
+
+  let currentQ = 0;
+  let score = 0;
+  let userAnswers = [];
+
+  const screenLogin  = document.getElementById('screen-login');
+  const screenQuiz   = document.getElementById('screen-quiz');
+  const screenResult = document.getElementById('screen-result');
+
+  const loginForm  = document.getElementById('login-form');
+  const usernameEl = document.getElementById('username');
+  const passwordEl = document.getElementById('password');
+  const loginError = document.getElementById('login-error');
+
+  const qIndexEl  = document.getElementById('q-index');
+  const qScoreEl  = document.getElementById('q-score');
+  const qTextEl   = document.getElementById('q-text');
+  const optionsEl = document.getElementById('options');
+  const btnNext   = document.getElementById('btn-next');
+
+  const finalScoreEl  = document.getElementById('final-score');
+  const finalStatusEl = document.getElementById('final-status');
+  const reviewListEl  = document.getElementById('review-list');
+  const btnRestart    = document.getElementById('btn-restart');
+
+  loginForm.addEventListener('submit', function(e){
+    e.preventDefault();
+    if(!usernameEl.value.trim() || !passwordEl.value.trim()){
+      loginError.textContent = "Please enter both username and password.";
+      return;
+    }
+    loginError.textContent = "";
+    screenLogin.classList.add('hidden');
+    screenQuiz.classList.remove('hidden');
+    renderQuestion();
+  });
+
+  function renderQuestion(){
+    qIndexEl.textContent = "Question " + (currentQ + 1) + " / " + QUESTIONS.length;
+    qScoreEl.textContent = "Score: " + score;
+
+    const current = QUESTIONS[currentQ];
+    qTextEl.textContent = (currentQ + 1) + ". " + current.q;
+
+    optionsEl.innerHTML = "";
+    btnNext.disabled = true;
+
+    current.options.forEach(function(optText, i){
+      const label = document.createElement('label');
+      label.className = "option-row";
+
+      const radio = document.createElement('input');
+      radio.type = "radio";
+      radio.name = "option";
+      radio.value = i;
+
+      radio.addEventListener('change', function(){
+        userAnswers[currentQ] = i;
+        if(i === current.answer) score++;
+        qScoreEl.textContent = "Score: " + score;
+        btnNext.disabled = false;
+        document.querySelectorAll('input[name="option"]').forEach(function(r){ r.disabled = true; });
+      });
+
+      label.appendChild(radio);
+      label.appendChild(document.createTextNode(optText));
+      optionsEl.appendChild(label);
+    });
+  }
+
+  btnNext.addEventListener('click', function(){
+    currentQ++;
+    if(currentQ < QUESTIONS.length){
+      renderQuestion();
+    } else {
+      showResult();
+    }
+  });
+
+  function showResult(){
+    screenQuiz.classList.add('hidden');
+    screenResult.classList.remove('hidden');
+
+    const total = QUESTIONS.length;
+    const passed = score >= Math.ceil(total * 0.6);
+
+    finalScoreEl.textContent = score + "/" + total;
+    finalStatusEl.textContent = passed ? "Result: Pass" : "Result: Fail";
+    finalStatusEl.className = "result-status " + (passed ? "pass" : "fail");
+
+    reviewListEl.innerHTML = "";
+    QUESTIONS.forEach(function(q, i){
+      const li = document.createElement('li');
+      const correct = userAnswers[i] === q.answer;
+      const tag = document.createElement('span');
+      tag.className = correct ? "ok" : "no";
+      tag.textContent = correct ? "Correct" : "Wrong";
+      li.appendChild(tag);
+      li.appendChild(document.createTextNode(" — Q" + (i + 1) + ". " + q.q));
+      reviewListEl.appendChild(li);
+    });
+  }
+
+  btnRestart.addEventListener('click', function(){
+    currentQ = 0;
+    score = 0;
+    userAnswers = [];
+    screenResult.classList.add('hidden');
+    screenLogin.classList.remove('hidden');
+    usernameEl.value = "";
+    passwordEl.value = "";
+  });
+
+})();
+</script>
+
+</body>
+</html>
