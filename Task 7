@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Task Deletion Confirmation & Feedback</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #ffffff;
+    margin: 0;
+    padding: 40px 30px;
+  }
+  h2 {
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: bold;
+    font-size: 22px;
+    margin: 0 0 30px;
+  }
+
+  .card {
+    background: #ffffff;
+    max-width: 480px;
+    padding: 24px 28px 30px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  .card h3 {
+    font-size: 17px;
+    margin: 0 0 8px;
+  }
+  .card p.desc {
+    font-size: 13px;
+    color: #555;
+    margin: 0 0 20px;
+  }
+
+  button {
+    background-color: #2e8b3d;
+    color: #fff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  button:hover { background-color: #256b30; }
+
+  #log {
+    margin-top: 20px;
+    font-size: 13px;
+    border-top: 1px solid #eee;
+    padding-top: 14px;
+    display: none;
+  }
+  #log p {
+    margin: 0 0 8px;
+    color: #333;
+  }
+</style>
+</head>
+<body>
+
+<h2>Task Deletion Confirmation &amp; Feedback</h2>
+
+<div class="card">
+  <h3>JavaScript Pop-up Manager</h3>
+  <p class="desc">
+    Demonstrates the three JavaScript dialogue boxes — Alert, Confirm, and Prompt —
+    used together in one application-based workflow.
+  </p>
+
+  <button id="run-btn">Delete Task</button>
+
+  <div id="log"></div>
+</div>
+
+<script>
+  document.getElementById('run-btn').addEventListener('click', function () {
+    const log = document.getElementById('log');
+    log.style.display = "block";
+    log.innerHTML = "";
+
+    function addLine(text) {
+      const p = document.createElement('p');
+      p.textContent = text;
+      log.appendChild(p);
+    }
+
+    // 1. ALERT: inform the user about the action
+    alert("The task will now be deleted.");
+    addLine("Alert shown: 'The task will now be deleted.'");
+
+    // 2. CONFIRM: ask if the user really wants to delete
+    const isConfirmed = confirm("Are you sure you want to delete this task?");
+    addLine("Confirm result: " + isConfirmed);
+
+    if (isConfirmed) {
+      // 3. PROMPT: ask for a reason/remark for deletion
+      const reason = prompt("Please enter a reason or remark for deletion:", "");
+
+      if (reason && reason.trim() !== "") {
+        addLine("Prompt result: '" + reason + "'");
+        addLine("Task deleted successfully. Reason recorded: '" + reason + "'");
+      } else {
+        addLine("Prompt cancelled or left empty. Task deleted with no remark.");
+      }
+    } else {
+      addLine("Deletion cancelled by user. No changes made.");
+    }
+  });
+</script>
+
+</body>
+</html>
